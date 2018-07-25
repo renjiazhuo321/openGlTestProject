@@ -12,6 +12,11 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import static android.opengl.Matrix.multiplyMM;
+import static android.opengl.Matrix.rotateM;
+import static android.opengl.Matrix.setIdentityM;
+import static android.opengl.Matrix.translateM;
+
 
 /**
  * Created by Administrator on 2018/6/15 0015.
@@ -30,6 +35,7 @@ public class TestRenderer implements GLSurfaceView.Renderer {
     private int aPositionLocation = -1;
     private int aMatrix = -1;
     private float projectMatrix[] = new float[16];
+    private float modelMatrix[] = new float[16];
     private static final int STRIDE =
             (POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT) * BYTES_PER_FLOAT;
 
@@ -91,15 +97,24 @@ public class TestRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
-        float aspectRatio = width > height ?
-                (float) width / (float) height :
-                (float) height / (float) width;
+//        float aspectRatio = width > height ?
+//                (float) width / (float) height :
+//                (float) height / (float) width;
+//
+//        if (width > height) {
+//            Matrix.orthoM(projectMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f);
+//        } else {
+//            Matrix.orthoM(projectMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
+//        }
+        MatrixHelper.perspectiveM(projectMatrix, 45, (float) width / (float) height, 1f, 10f);
+        setIdentityM(modelMatrix,0);
+        translateM(modelMatrix,0,0f,0f,-3.0f);
+        rotateM(modelMatrix,0,-60f,1f,0f,0f);
+        final float[] temp = new float[16];
+        multiplyMM(temp,0,projectMatrix,0,modelMatrix,0);
+        System.arraycopy(temp, 0, projectMatrix, 0, temp.length);
 
-        if (width > height) {
-            Matrix.orthoM(projectMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f);
-        } else {
-            Matrix.orthoM(projectMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
-        }
+
     }
 
 
